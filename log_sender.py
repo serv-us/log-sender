@@ -13,6 +13,7 @@ from watchdog.events import FileSystemEventHandler
 import fnmatch
 import json
 import yadisk
+import threading
 
 def ensure_directory_exists(client, path, logger=None):
     """Создает директорию рекурсивно на Яндекс.Диске"""
@@ -123,6 +124,10 @@ class LogSender:
         )
         self.logger = logging.getLogger(__name__)
         
+        # Блокировки для потокобезопасности
+        self.processed_lock = threading.Lock()
+        self.failed_lock = threading.Lock()
+        
         # Загрузка истории
         self.processed = self._load_processed()
         self.failed_queue = self._load_failed_queue()
@@ -153,10 +158,11 @@ class LogSender:
     
     def _mark_processed(self, filepath):
         """Отмечает файл как обработанный"""
-        self.processed.add(str(filepath))
-        os.makedirs(self.processed_file.parent, exist_ok=True)
-        with open(self.processed_file, 'a') as f:
-            f.write(f"{filepath}\n")
+        with self.processed_lock:
+            self.processed.add(str(filepath))
+            os.makedirs(self.processed_file.parent, exist_ok=True)
+            with open(self.processed_file, 'a') as f:
+                f.write(f"{filepath}\n")
     
     def _load_failed_queue(self):
         """Загружает очередь неудачных отправок"""
@@ -176,21 +182,23 @@ class LogSender:
     
     def _add_to_failed_queue(self, filepath, parts=None):
         """Добавляет файл в очередь неудачных отправок"""
-        entry = {
-            'filepath': str(filepath),
-            'parts': parts or [],
-            'attempts': 0,
-            'last_attempt': datetime.now().isoformat(),
-            'next_retry': (datetime.now().timestamp() + self.retry_later_delay)
-        }
-        self.failed_queue.append(entry)
-        self._save_failed_queue()
-        self.logger.warning(f"⏰ Файл добавлен в очередь повторной отправки: {filepath}")
+        with self.failed_lock:
+            entry = {
+                'filepath': str(filepath),
+                'parts': parts or [],
+                'attempts': 0,
+                'last_attempt': datetime.now().isoformat(),
+                'next_retry': (datetime.now().timestamp() + self.retry_later_delay)
+            }
+            self.failed_queue.append(entry)
+            self._save_failed_queue()
+            self.logger.warning(f"⏰ Файл добавлен в очередь повторной отправки: {filepath}")
     
     def _remove_from_failed_queue(self, filepath):
         """Удаляет файл из очереди неудачных отправок"""
-        self.failed_queue = [e for e in self.failed_queue if e['filepath'] != str(filepath)]
-        self._save_failed_queue()
+        with self.failed_lock:
+            self.failed_queue = [e for e in self.failed_queue if e['filepath'] != str(filepath)]
+            self._save_failed_queue()
     
     def _matches_pattern(self, filename):
         """Проверяет, соответствует ли файл одному из паттернов"""
@@ -529,7 +537,9 @@ class LogRotateHandler(FileSystemEventHandler):
         filepath = Path(event.src_path)
         if self.sender._matches_pattern(filepath.name):
             self.sender.logger.info(f"🔔 Обнаружен новый файл: {filepath.name}")
-            self.sender.process_file(filepath)
+            # Запускаем обработку в отдельном потоке
+            thread = threading.Thread(target=self.sender.process_file, args=(filepath,), daemon=True)
+            thread.start()
 
 def main():
     if len(sys.argv) > 1:
@@ -556,7 +566,9 @@ def main():
         # Проверка существующих файлов при запуске
         for pattern in sender.patterns:
             for filepath in sender.watch_dir.glob(pattern):
-                sender.process_file(filepath)
+                # Запускаем обработку в отдельном потоке
+                thread = threading.Thread(target=sender.process_file, args=(filepath,), daemon=True)
+                thread.start()
         
         # Запуск мониторинга
         event_handler = LogRotateHandler(sender)
