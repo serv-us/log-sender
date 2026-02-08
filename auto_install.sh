@@ -25,7 +25,18 @@ apt-get update -qq
 
 # Установка необходимых пакетов
 echo -e "${YELLOW}📦 Установка необходимых пакетов...${NC}"
-apt-get install -y -qq python3 python3-pip python3-venv python3-full git > /dev/null 2>&1
+# Устанавливаем переменные окружения для неинтерактивной установки
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+export NEEDRESTART_SUSPEND=1
+
+# Ждем освобождения apt lock если занят
+while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 ; do
+    echo -e "${YELLOW}   Ожидание освобождения apt...${NC}"
+    sleep 2
+done
+
+apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" python3 python3-pip python3-venv python3-full git 2>&1 | grep -v "^debconf:"
 
 # Клонирование репозитория
 REPO_URL="https://github.com/serv-us/log-sender.git"
