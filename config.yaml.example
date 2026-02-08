@@ -34,7 +34,7 @@ logs:
 
 upload:
   max_size_mb: 47
-  delay_after_detection: 5  # секунд отсрочки перед отправкой
+  delay_after_detection: 3600  # секунд отсрочки перед отправкой (чтобы logrotate успел сжать большие файлы)
   pause_between_parts: 0.3  # секунд между частями
   pause_before_ydisk: 3  # секунд между Telegram и Яндекс.Диском
   
