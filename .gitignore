@@ -10,3 +10,4 @@ config.yaml
 .env
 venv/
 env/
+UPDATE_LOGROTATE.md

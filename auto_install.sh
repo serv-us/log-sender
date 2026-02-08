@@ -104,7 +104,7 @@ EOF
 
 # Создание logrotate конфига
 echo -e "${YELLOW}🔄 Создание logrotate конфига...${NC}"
-tee /etc/logrotate.d/remnanode > /dev/null <<EOF
+cat > /etc/logrotate.d/remnanode <<'LOGROTATE_EOF'
 /var/log/remnanode/*.log {
     daily
     rotate 5
@@ -114,8 +114,36 @@ tee /etc/logrotate.d/remnanode > /dev/null <<EOF
     copytruncate
     dateext
     dateformat -%Y-%m-%d-%H%M
+    extension .log
+    
+    postrotate
+        # Получаем IP сервера
+        SERVER_IP=$(hostname -I | awk '{print $1}' | tr '.' '-')
+        
+        # Переименовываем ротированные файлы
+        for file in /var/log/remnanode/*.log-[0-9]*; do
+            if [ -f "$file" ]; then
+                basename=$(basename "$file")
+                logname=$(echo "$basename" | sed 's/\.log-.*//') 
+                datepart=$(echo "$basename" | sed 's/.*\.log-//')
+                newname="/var/log/remnanode/${SERVER_IP}-${logname}-${datepart}.log"
+                mv "$file" "$newname" 2>/dev/null || true
+            fi
+        done
+        
+        # Переименовываем сжатые файлы
+        for file in /var/log/remnanode/*.log-[0-9]*.gz; do
+            if [ -f "$file" ]; then
+                basename=$(basename "$file")
+                logname=$(echo "$basename" | sed 's/\.log-.*//') 
+                datepart=$(echo "$basename" | sed 's/.*\.log-//' | sed 's/\.gz$//')
+                newname="/var/log/remnanode/${SERVER_IP}-${logname}-${datepart}.log.gz"
+                mv "$file" "$newname" 2>/dev/null || true
+            fi
+        done
+    endscript
 }
-EOF
+LOGROTATE_EOF
 
 # Очистка временных файлов
 echo -e "${YELLOW}🧹 Очистка временных файлов...${NC}"

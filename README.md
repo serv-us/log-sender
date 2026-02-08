@@ -186,8 +186,19 @@ sudo systemctl stop log-sender
     copytruncate
     dateext
     dateformat -%Y-%m-%d-%H%M
+    extension .log
+    
+    postrotate
+        # Автоматически добавляет IP сервера в начало имени файла
+        # Формат: IP-logname-date.log.gz
+        # Пример: 192-168-1-10-access-2026-02-08-1536.log.gz
+    endscript
 }
 ```
+
+**Формат ротированных файлов:**
+- До сжатия: `192-168-1-10-access-2026-02-08-1536.log`
+- После сжатия: `192-168-1-10-access-2026-02-08-1536.log.gz`
 
 ## Обработка ошибок
 
