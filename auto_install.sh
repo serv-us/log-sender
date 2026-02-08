@@ -114,6 +114,7 @@ cat > /etc/logrotate.d/remnanode <<'LOGROTATE_EOF'
     copytruncate
     dateext
     dateformat -%Y-%m-%d-%H%M
+    extension .log
 }
 LOGROTATE_EOF
 

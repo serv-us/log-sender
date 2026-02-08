@@ -186,11 +186,12 @@ sudo systemctl stop log-sender
     copytruncate
     dateext
     dateformat -%Y-%m-%d-%H%M
+    extension .log
 }
 ```
 
 **Формат ротированных файлов:**
-- Пример: `access-2026-02-08-1554.log.gz`
+- Пример: `error-2026-02-08-1554.log.gz`
 
 ## Обработка ошибок
 
