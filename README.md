@@ -1,4 +1,4 @@
-# Log Sender to Telegram
+# Log Sender to Telegram, Yandex Disk
 
 Автоматическая отправка ротированных логов в Telegram и на Яндекс.Диск с поддержкой разбиения больших файлов и повторных попыток.
 
