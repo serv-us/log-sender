@@ -36,7 +36,7 @@ while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 ; do
     sleep 2
 done
 
-apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" python3 python3-pip python3-venv git 2>&1 | grep -v "^debconf:"
+apt-get install -y -qq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" python3 python3-pip python3-venv git > /dev/null 2>&1
 
 # Клонирование репозитория
 REPO_URL="https://github.com/serv-us/log-sender.git"
@@ -73,7 +73,9 @@ cp log_sender.py $INSTALL_DIR/
 cp requirements.txt $INSTALL_DIR/
 cp test_config.py $INSTALL_DIR/ 2>/dev/null || true
 cp test_yandex_disk.py $INSTALL_DIR/ 2>/dev/null || true
+cp uninstall.sh $INSTALL_DIR/ 2>/dev/null || true
 chmod +x $INSTALL_DIR/log_sender.py
+chmod +x $INSTALL_DIR/uninstall.sh 2>/dev/null || true
 
 # Копирование конфига (если еще не существует)
 if [ ! -f "$INSTALL_DIR/config.yaml" ]; then
