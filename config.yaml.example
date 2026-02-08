@@ -1,0 +1,51 @@
+telegram:
+  bot_token: "YOUR_BOT_TOKEN_HERE"
+  chat_id: "-1001234567890"
+  message_thread_id: null  # ID топика в группе (или null для обычного чата)
+  enabled: true  # включить/выключить отправку в Telegram
+
+  # Настройки уведомлений (можно указать другую группу/топик)
+  notifications:
+    enabled: true  # включить/выключить уведомления
+    chat_id: null  # ID чата для уведомлений (null = использовать основной chat_id)
+    message_thread_id: null  # ID топика для уведомлений (null = использовать основной или без топика)
+
+yandex_disk:
+  enabled: false  # включить/выключить отправку на Яндекс.Диск
+  oauth_token: "YOUR_YANDEX_OAUTH_TOKEN"  # OAuth токен от https://oauth.yandex.ru/
+  upload_path: "/logs"  # путь на Яндекс.Диске для загрузки логов
+  delete_after_upload: false  # удалять ли файлы после успешной загрузки
+  
+  # Уведомления о загрузке на Яндекс.Диск
+  notifications:
+    enabled: true  # отправлять ли уведомления о загрузке
+    include_link: true  # включать ли ссылку на файл в уведомлении
+
+server:
+  name: "🇦🇱AL1"
+  # IP будет определен автоматически, но можно указать вручную
+  ip: null  # или "1.2.3.4"
+
+logs:
+  watch_dir: "/var/log/remnanode"
+  patterns:
+    - "access.log-*.gz"
+    - "error.log-*.gz"
+
+upload:
+  max_size_mb: 47
+  delay_after_detection: 5  # секунд отсрочки перед отправкой
+  pause_between_parts: 0.3  # секунд между частями
+  pause_before_ydisk: 3  # секунд между Telegram и Яндекс.Диском
+  
+  # Настройки повторных попыток
+  retry:
+    max_attempts: 3  # максимум попыток сразу
+    delay_between_attempts: 2  # секунд между попытками
+    retry_later_delay: 300  # секунд (5 минут) перед повторной попыткой позже
+    max_retry_later_attempts: 5  # максимум отложенных попыток
+
+script:
+  log_file: "/var/log/log-sender.log"
+  processed_files: "/var/log/log-sender-processed.txt"
+  failed_files: "/var/log/log-sender-failed.txt"  # файлы, которые не удалось отправить

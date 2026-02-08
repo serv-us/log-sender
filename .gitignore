@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.log
+*.txt
+!requirements.txt
+config.yaml
+.env
+venv/
+env/

@@ -1,0 +1,4 @@
+requests>=2.31.0
+PyYAML>=6.0
+watchdog>=3.0.0
+yadisk>=3.0.0
