@@ -114,24 +114,6 @@ cat > /etc/logrotate.d/remnanode <<'LOGROTATE_EOF'
     copytruncate
     dateext
     dateformat -%Y-%m-%d-%H%M
-    
-    lastaction
-        # Получаем IP сервера
-        SERVER_IP=$(hostname -I | awk '{print $1}' | tr '.' '-')
-        
-        # Переименовываем файлы формата: logname-YYYY-MM-DD-HHMM.log.gz
-        for file in /var/log/remnanode/*-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9].log.gz; do
-            if [ -f "$file" ]; then
-                basename=$(basename "$file")
-                # Извлекаем имя лога и дату
-                logname=$(echo "$basename" | sed 's/-[0-9].*//') 
-                datepart=$(echo "$basename" | sed 's/^[^-]*-//' | sed 's/\.log\.gz$//')
-                # Новое имя: IP-logname-date.log.gz
-                newname="/var/log/remnanode/${SERVER_IP}-${logname}-${datepart}.log.gz"
-                mv "$file" "$newname"
-            fi
-        done
-    endscript
 }
 LOGROTATE_EOF
 

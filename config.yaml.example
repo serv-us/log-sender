@@ -29,8 +29,8 @@ server:
 logs:
   watch_dir: "/var/log/remnanode"
   patterns:
-    - "*-access-*.log.gz"
-    - "*-error-*.log.gz"
+    - "access-*.log.gz"
+    - "error-*.log.gz"
 
 upload:
   max_size_mb: 47
