@@ -116,27 +116,19 @@ cat > /etc/logrotate.d/remnanode <<'LOGROTATE_EOF'
     dateformat -%Y-%m-%d-%H%M
     extension .log
     
-    postrotate
+    lastaction
         # Получаем IP сервера
         SERVER_IP=$(hostname -I | awk '{print $1}' | tr '.' '-')
         
-        # Переименовываем ротированные файлы
-        for file in /var/log/remnanode/*.log-[0-9]*; do
-            if [ -f "$file" ]; then
-                basename=$(basename "$file")
-                logname=$(echo "$basename" | sed 's/\.log-.*//') 
-                datepart=$(echo "$basename" | sed 's/.*\.log-//')
-                newname="/var/log/remnanode/${SERVER_IP}-${logname}-${datepart}.log"
-                mv "$file" "$newname" 2>/dev/null || true
-            fi
-        done
-        
-        # Переименовываем сжатые файлы
+        # Переименовываем сжатые файлы (после compress)
         for file in /var/log/remnanode/*.log-[0-9]*.gz; do
             if [ -f "$file" ]; then
                 basename=$(basename "$file")
+                # Извлекаем имя лога (access, error и т.д.)
                 logname=$(echo "$basename" | sed 's/\.log-.*//') 
+                # Извлекаем дату
                 datepart=$(echo "$basename" | sed 's/.*\.log-//' | sed 's/\.gz$//')
+                # Новое имя: IP-logname-date.log.gz
                 newname="/var/log/remnanode/${SERVER_IP}-${logname}-${datepart}.log.gz"
                 mv "$file" "$newname" 2>/dev/null || true
             fi
