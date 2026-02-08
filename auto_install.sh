@@ -114,23 +114,21 @@ cat > /etc/logrotate.d/remnanode <<'LOGROTATE_EOF'
     copytruncate
     dateext
     dateformat -%Y-%m-%d-%H%M
-    extension .log
     
     lastaction
         # Получаем IP сервера
         SERVER_IP=$(hostname -I | awk '{print $1}' | tr '.' '-')
         
-        # Переименовываем сжатые файлы (после compress)
-        for file in /var/log/remnanode/*.log-[0-9]*.gz; do
+        # Переименовываем файлы формата: logname-YYYY-MM-DD-HHMM.log.gz
+        for file in /var/log/remnanode/*-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9].log.gz; do
             if [ -f "$file" ]; then
                 basename=$(basename "$file")
-                # Извлекаем имя лога (access, error и т.д.)
-                logname=$(echo "$basename" | sed 's/\.log-.*//') 
-                # Извлекаем дату
-                datepart=$(echo "$basename" | sed 's/.*\.log-//' | sed 's/\.gz$//')
+                # Извлекаем имя лога и дату
+                logname=$(echo "$basename" | sed 's/-[0-9].*//') 
+                datepart=$(echo "$basename" | sed 's/^[^-]*-//' | sed 's/\.log\.gz$//')
                 # Новое имя: IP-logname-date.log.gz
                 newname="/var/log/remnanode/${SERVER_IP}-${logname}-${datepart}.log.gz"
-                mv "$file" "$newname" 2>/dev/null || true
+                mv "$file" "$newname"
             fi
         done
     endscript
