@@ -36,7 +36,7 @@ while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 ; do
     sleep 2
 done
 
-apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" python3 python3-pip python3-venv python3-full git 2>&1 | grep -v "^debconf:"
+apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" python3 python3-pip python3-venv git 2>&1 | grep -v "^debconf:"
 
 # Клонирование репозитория
 REPO_URL="https://github.com/serv-us/log-sender.git"
