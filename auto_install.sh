@@ -38,6 +38,16 @@ done
 
 apt-get install -y -qq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" python3 python3-pip python3-venv git > /dev/null 2>&1
 
+# Проверка и установка logrotate
+echo -e "${YELLOW}🔍 Проверка наличия logrotate...${NC}"
+if ! command -v logrotate &> /dev/null; then
+    echo -e "${YELLOW}📦 logrotate не найден, устанавливаем...${NC}"
+    apt-get install -y -qq logrotate > /dev/null 2>&1
+    echo -e "${GREEN}✓ logrotate установлен${NC}"
+else
+    echo -e "${GREEN}✓ logrotate уже установлен${NC}"
+fi
+
 # Клонирование репозитория
 REPO_URL="https://github.com/serv-us/log-sender.git"
 TEMP_DIR="/tmp/log-sender-install-$$"
