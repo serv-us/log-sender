@@ -183,6 +183,18 @@ class LogSender:
     def _add_to_failed_queue(self, filepath, parts=None):
         """Добавляет файл в очередь неудачных отправок"""
         with self.failed_lock:
+            # Проверяем, нет ли уже этого файла в очереди
+            for entry in self.failed_queue:
+                if entry['filepath'] == str(filepath):
+                    # Файл уже в очереди, обновляем информацию
+                    entry['parts'] = parts or []
+                    entry['last_attempt'] = datetime.now().isoformat()
+                    entry['next_retry'] = datetime.now().timestamp() + self.retry_later_delay
+                    self._save_failed_queue()
+                    self.logger.warning(f"⏰ Файл уже в очереди, обновлена информация: {filepath}")
+                    return
+            
+            # Файла нет в очереди, добавляем новую запись
             entry = {
                 'filepath': str(filepath),
                 'parts': parts or [],
